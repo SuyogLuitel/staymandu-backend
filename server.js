@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import userRouter from "./routes/userRoute.js";
+import hotelRouter from "./routes/hotelRoute.js";
 import "dotenv/config";
 
 // app config
@@ -17,6 +18,7 @@ connectDB();
 
 // api endpoints
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/hotel", hotelRouter);
 
 app.get("/", (req, res) => {
   res.send("API Working");
