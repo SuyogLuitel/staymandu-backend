@@ -2,7 +2,9 @@ import express from "express";
 import {
   addHotel,
   addReview,
+  addRoomToHotel,
   getHotelById,
+  getHotelByUserId,
   listHotel,
 } from "../controller/hotelController.js";
 import multer from "multer";
@@ -23,8 +25,14 @@ const upload = multer({
 // Route to add a new hotel
 hotelRouter.post("/add", upload.single("image"), addHotel);
 
+// Route to add a new hotel
+hotelRouter.post("/add-room/:hotelId", upload.single("image"), addRoomToHotel);
+
 // Route to list all hotel
 hotelRouter.get("/list", listHotel);
+
+// Route to list hotel based on user id
+hotelRouter.get("/list/:userId", getHotelByUserId);
 
 // Route to list specific hotel
 hotelRouter.get("/:id", getHotelById);

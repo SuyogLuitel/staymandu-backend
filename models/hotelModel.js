@@ -20,6 +20,26 @@ const ratingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const roomSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  image: { type: String, required: true },
+  roomPrice: { type: Number, required: true },
+  bedCount: { type: Number, required: true },
+  guestCount: { type: Number, required: true },
+  view: {
+    type: String,
+    enum: ["cityView", "oceanView", "forestView", "mountainView"],
+    required: true,
+  },
+  roomService: { type: Boolean, default: false },
+  TV: { type: Boolean, default: false },
+  balcony: { type: Boolean, default: false },
+  freeWifi: { type: Boolean, default: false },
+  airCondition: { type: Boolean, default: false },
+  soundProof: { type: Boolean, default: false },
+});
+
 const hotelSchema = new mongoose.Schema(
   {
     userId: {
@@ -28,7 +48,11 @@ const hotelSchema = new mongoose.Schema(
       required: true,
     },
     title: { type: String, required: true },
-    type: { type: String, required: true },
+    type: {
+      type: String,
+      enum: ["Hotel", "Apartment", "Villa", "Resort"],
+      required: true,
+    },
     description: { type: String, required: true },
     locationDescription: { type: String },
     image: { type: String, required: true },
@@ -52,7 +76,7 @@ const hotelSchema = new mongoose.Schema(
       totalRating: { type: Number, default: 0 },
       individualRatings: [ratingSchema],
     },
-    rooms: [],
+    rooms: [roomSchema],
   },
   { timestamps: true }
 );

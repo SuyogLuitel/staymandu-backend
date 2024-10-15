@@ -95,6 +95,7 @@ const getHotelById = async (req, res) => {
   }
 };
 
+// add review
 const addReview = async (req, res) => {
   const { hotelId, userId, score, comment } = req.body;
 
@@ -126,4 +127,99 @@ const addReview = async (req, res) => {
   }
 };
 
-export { addHotel, listHotel, getHotelById, addReview };
+// Add room to hotel
+const addRoomToHotel = async (req, res) => {
+  const { hotelId } = req.params;
+  let image_filename = `${req?.file?.filename}`;
+
+  const {
+    title,
+    description,
+    roomPrice,
+    bedCount,
+    guestCount,
+    view,
+    roomService,
+    TV,
+    balcony,
+    freeWifi,
+    airCondition,
+    soundProof,
+  } = req.body;
+
+  try {
+    const hotel = await HotelModel.findById(hotelId);
+
+    if (!hotel) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Hotel not found" });
+    }
+
+    const newRoom = {
+      title,
+      description,
+      image: image_filename,
+      roomPrice,
+      bedCount,
+      guestCount,
+      view,
+      roomService: roomService || false,
+      TV: TV || false,
+      balcony: balcony || false,
+      freeWifi: freeWifi || false,
+      airCondition: airCondition || false,
+      soundProof: soundProof || false,
+    };
+
+    hotel.rooms.push(newRoom);
+
+    await hotel.save();
+
+    res
+      .status(201)
+      .json({ success: true, message: "Room added successfully", data: hotel });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error adding room to hotel",
+      error: error.message,
+    });
+  }
+};
+
+// Get hotels by userId
+const getHotelByUserId = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const hotels = await HotelModel.find({ userId });
+
+    if (!hotels || hotels.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No hotels found for this user" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Hotels retrieved successfully",
+      data: hotels,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching hotels",
+      error: error.message,
+    });
+  }
+};
+
+export {
+  addHotel,
+  listHotel,
+  getHotelById,
+  addReview,
+  addRoomToHotel,
+  getHotelByUserId,
+};
