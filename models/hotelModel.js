@@ -1,37 +1,24 @@
 import mongoose from "mongoose";
 
-const geolocationSchema = new mongoose.Schema({
-  latitude: { type: Number, required: true },
-  longitude: { type: Number, required: true },
-});
-
-const bookingSchema = new mongoose.Schema(
+const ratingSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "user",
       required: true,
     },
-    checkIn: { type: Date, required: true },
-    checkOut: { type: Date, required: true },
-    totalPrice: { type: Number, required: true },
-    status: {
+    score: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5,
+    },
+    comment: {
       type: String,
-      enum: ["pending", "confirmed", "cancelled"],
-      default: "pending",
     },
   },
   { timestamps: true }
 );
-
-const roomSchema = new mongoose.Schema({
-  roomNumber: { type: String, required: true },
-  type: { type: String, required: true },
-  price: { type: Number, required: true },
-  capacity: { type: Number, required: true },
-  amenities: [String],
-  bookings: [bookingSchema], // Bookings are now part of the room schema
-});
 
 const hotelSchema = new mongoose.Schema(
   {
@@ -48,8 +35,6 @@ const hotelSchema = new mongoose.Schema(
     country: { type: String, required: true },
     province: { type: String, required: true },
     city: { type: String, required: true },
-    street: { type: String, required: true },
-    geolocation: { type: geolocationSchema, required: true },
     gym: { type: Boolean, default: false },
     spa: { type: Boolean, default: false },
     bar: { type: Boolean, default: false },
@@ -62,7 +47,12 @@ const hotelSchema = new mongoose.Schema(
     movieNight: { type: Boolean, default: false },
     swimmingPool: { type: Boolean, default: false },
     coffeeShop: { type: Boolean, default: false },
-    rooms: [roomSchema],
+    ratings: {
+      averageRating: { type: Number, default: 0 },
+      totalRating: { type: Number, default: 0 },
+      individualRatings: [ratingSchema],
+    },
+    rooms: [],
   },
   { timestamps: true }
 );

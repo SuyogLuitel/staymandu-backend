@@ -19,6 +19,7 @@ connectDB();
 // api endpoints
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/hotel", hotelRouter);
+app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {
   res.send("API Working");
