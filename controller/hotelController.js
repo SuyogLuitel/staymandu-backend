@@ -39,13 +39,13 @@ const addHotel = async (req, res) => {
   }
 };
 
-// list all hotel
+// List all hotels based on the latest added
 const listHotel = async (req, res) => {
   try {
-    const hotels = await HotelModel.find({});
+    const hotels = await HotelModel.find({}).sort({ createdAt: -1 }); // Sort by createdAt in descending order
     res.status(200).json({ success: true, data: hotels });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error loading hotel" });
+    res.status(500).json({ success: false, message: "Error loading hotels" });
   }
 };
 
@@ -193,7 +193,7 @@ const getHotelByUserId = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const hotels = await HotelModel.find({ userId });
+    const hotels = await HotelModel.find({ userId }).sort({ createdAt: -1 });
 
     if (!hotels || hotels.length === 0) {
       return res
