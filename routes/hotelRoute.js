@@ -4,6 +4,7 @@ import {
   addReview,
   addRoomToHotel,
   bookHotel,
+  getBookingListByUserId,
   getHotelById,
   getHotelByUserId,
   listHotel,
@@ -41,7 +42,10 @@ hotelRouter.get("/:id", getHotelById);
 // Route to add review
 hotelRouter.post("/add-review", addReview);
 
-// Route to book hotek
+// Route to book hotel
 hotelRouter.post("/book-hotel", bookHotel);
+
+// Route to list booked hotel by user id
+hotelRouter.get("/booking/:userId", getBookingListByUserId);
 
 export default hotelRouter;

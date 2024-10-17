@@ -1,5 +1,6 @@
 import fs from "fs";
 import HotelModel from "../models/hotelModel.js";
+import mongoose from "mongoose";
 
 // add hotel
 const addHotel = async (req, res) => {
@@ -262,6 +263,73 @@ const bookHotel = async (req, res) => {
   }
 };
 
+// get booking history
+const getBookingListByUserId = async (req, res) => {
+  const { userId } = req.params;
+
+  if (!mongoose.isValidObjectId(userId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid user ID format",
+    });
+  }
+
+  try {
+    const hotels = await HotelModel.find({ "rooms.booking.userId": userId })
+      .populate({
+        path: "rooms.booking",
+        match: { userId: userId },
+        select: "totalPrice startDate endDate createdAt",
+      })
+      .exec();
+
+    const bookingList = hotels
+      .map((hotel) => {
+        const bookedRooms = hotel.rooms
+          .filter((room) =>
+            room.booking.some((booking) => booking.userId.toString() === userId)
+          )
+          .map((room) => {
+            const bookingDetails = room.booking.find(
+              (booking) => booking.userId.toString() === userId
+            );
+            return {
+              id: room._id, // Room ID
+              title: room.title, // Room title
+              image: room.image, // Room image
+              bedCount: room.bedCount, // Bed count
+              guestCount: room.guestCount, // Guest count
+              totalPrice: bookingDetails.totalPrice, // Booking price
+              startDate: bookingDetails.startDate, // Start date of the booking
+              endDate: bookingDetails.endDate, // End date of the booking
+            };
+          });
+
+        return {
+          id: hotel._id,
+          title: hotel.title,
+          image: hotel.image,
+          city: hotel.city,
+          country: hotel.country,
+          bookedRooms: bookedRooms,
+        };
+      })
+      .filter((hotel) => hotel.bookedRooms.length > 0);
+
+    res.status(200).json({
+      success: true,
+      message: "Bookings retrieved successfully",
+      data: bookingList,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching bookings",
+      error: error.message,
+    });
+  }
+};
+
 export {
   addHotel,
   listHotel,
@@ -270,4 +338,5 @@ export {
   addRoomToHotel,
   getHotelByUserId,
   bookHotel,
+  getBookingListByUserId,
 };
