@@ -20,6 +20,30 @@ const ratingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const bookingSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    required: true,
+  },
+  totalPrice: {
+    type: Number,
+    required: true,
+  },
+  startDate: {
+    type: Date,
+    required: true,
+  },
+  endDate: {
+    type: Date,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const roomSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
@@ -38,6 +62,7 @@ const roomSchema = new mongoose.Schema({
   freeWifi: { type: Boolean, default: false },
   airCondition: { type: Boolean, default: false },
   soundProof: { type: Boolean, default: false },
+  booking: [bookingSchema],
 });
 
 const hotelSchema = new mongoose.Schema(

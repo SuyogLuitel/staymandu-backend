@@ -215,6 +215,53 @@ const getHotelByUserId = async (req, res) => {
   }
 };
 
+// book hotel
+const bookHotel = async (req, res) => {
+  const { roomId, userId, totalPrice, startDate, endDate } = req.body;
+
+  try {
+    const hotel = await HotelModel.findOne({ "rooms._id": roomId });
+
+    if (!hotel) {
+      return res.status(404).json({ message: "Hotel room not found." });
+    }
+
+    const room = hotel.rooms.id(roomId);
+
+    const isRoomAvailable = room.booking.every((booking) => {
+      const bookingStart = new Date(booking.startDate);
+      const bookingEnd = new Date(booking.endDate);
+      return startDate >= bookingEnd || endDate <= bookingStart; // Room is available if new booking does not overlap with existing bookings
+    });
+
+    if (!isRoomAvailable) {
+      return res
+        .status(400)
+        .json({ message: "Room is not available for the selected dates." });
+    }
+
+    const newBooking = {
+      userId,
+      totalPrice,
+      startDate,
+      endDate,
+      createdAt: Date.now(),
+    };
+
+    room.booking.push(newBooking);
+
+    await hotel.save();
+
+    return res
+      .status(201)
+      .json({ message: "Booking successful", booking: newBooking });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error booking hotel", error: error.message });
+  }
+};
+
 export {
   addHotel,
   listHotel,
@@ -222,4 +269,5 @@ export {
   addReview,
   addRoomToHotel,
   getHotelByUserId,
+  bookHotel,
 };

@@ -3,6 +3,7 @@ import {
   addHotel,
   addReview,
   addRoomToHotel,
+  bookHotel,
   getHotelById,
   getHotelByUserId,
   listHotel,
@@ -39,5 +40,8 @@ hotelRouter.get("/:id", getHotelById);
 
 // Route to add review
 hotelRouter.post("/add-review", addReview);
+
+// Route to book hotek
+hotelRouter.post("/book-hotel", bookHotel);
 
 export default hotelRouter;
