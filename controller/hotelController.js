@@ -43,7 +43,32 @@ const addHotel = async (req, res) => {
 // List all hotels based on the latest added
 const listHotel = async (req, res) => {
   try {
-    const hotels = await HotelModel.find({}).sort({ createdAt: -1 }); // Sort by createdAt in descending order
+    const { sortBy } = req.query;
+
+    let sortCriteria = {};
+
+    // Apply sorting based on sortBy query parameter
+    switch (sortBy) {
+      case "latest":
+        sortCriteria = { createdAt: -1 }; // Sort by latest createdAt
+        break;
+      case "maxPrice":
+        sortCriteria = { "rooms.roomPrice": -1 }; // Sort by the highest room price (assuming rooms[0] is the relevant price)
+        break;
+      case "minPrice":
+        sortCriteria = { "rooms.roomPrice": 1 }; // Sort by the lowest room price
+        break;
+      case "rating":
+        sortCriteria = { "ratings.averageRating": -1 }; // Sort by the highest average rating
+        break;
+      default:
+        sortCriteria = {}; // No sorting (default behavior)
+        break;
+    }
+
+    // Fetch hotels from the database and apply sorting
+    const hotels = await HotelModel.find({}).sort(sortCriteria);
+
     res.status(200).json({ success: true, data: hotels });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error loading hotels" });
