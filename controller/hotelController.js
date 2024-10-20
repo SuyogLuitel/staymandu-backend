@@ -43,33 +43,45 @@ const addHotel = async (req, res) => {
 // List all hotels based on the latest added
 const listHotel = async (req, res) => {
   try {
-    const { sortBy } = req.query;
+    const { page = 1, sortBy } = req.query;
 
     let sortCriteria = {};
 
-    // Apply sorting based on sortBy query parameter
     switch (sortBy) {
       case "latest":
-        sortCriteria = { createdAt: -1 }; // Sort by latest createdAt
+        sortCriteria = { createdAt: -1 };
         break;
       case "maxPrice":
-        sortCriteria = { "rooms.roomPrice": -1 }; // Sort by the highest room price (assuming rooms[0] is the relevant price)
+        sortCriteria = { "rooms.roomPrice": -1 };
         break;
       case "minPrice":
-        sortCriteria = { "rooms.roomPrice": 1 }; // Sort by the lowest room price
+        sortCriteria = { "rooms.roomPrice": 1 };
         break;
       case "rating":
-        sortCriteria = { "ratings.averageRating": -1 }; // Sort by the highest average rating
+        sortCriteria = { "ratings.averageRating": -1 };
         break;
       default:
-        sortCriteria = {}; // No sorting (default behavior)
+        sortCriteria = {};
         break;
     }
 
-    // Fetch hotels from the database and apply sorting
-    const hotels = await HotelModel.find({}).sort(sortCriteria);
+    const totalHotels = await HotelModel.countDocuments();
 
-    res.status(200).json({ success: true, data: hotels });
+    const pageNumber = parseInt(page, 10);
+    const limit = 6;
+
+    const hotels = await HotelModel.find({})
+      .sort(sortCriteria)
+      .skip((pageNumber - 1) * limit)
+      .limit(limit)
+      .exec();
+
+    res.status(200).json({
+      success: true,
+      data: hotels,
+      currentPage: pageNumber,
+      totalPages: Math.ceil(totalHotels / limit),
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error loading hotels" });
   }
