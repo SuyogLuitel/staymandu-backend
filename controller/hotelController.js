@@ -147,6 +147,9 @@ const listHotelsByDistance = async (req, res) => {
     const hotels = await HotelModel.aggregate([
       geoNearStage,
       {
+        $sort: { distance: 1 }, // Sort by nearest distance first
+      },
+      {
         $sort: sortCriteria, // Sort based on the criteria
       },
       {
