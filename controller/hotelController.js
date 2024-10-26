@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 // add hotel
 const addHotel = async (req, res) => {
   let image_filename = `${req?.file?.filename}`;
@@ -21,6 +22,12 @@ const addHotel = async (req, res) => {
     country: req.body.country,
     province: req.body.province,
     city: req.body.city,
+    streetname: req.body.streetname,
+    url: req.body.url,
+    location: {
+      type: "Point",
+      coordinates: [req.body.longitude, req.body.latitude],
+    },
     gym: req.body.gym,
     spa: req.body.spa,
     bar: req.body.bar,
@@ -89,6 +96,85 @@ const listHotel = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Error loading hotels" });
+  }
+};
+
+// List all hotels nearest to user(5000m)
+const listHotelsByDistance = async (req, res) => {
+  const {
+    longitude,
+    latitude,
+    page = 1,
+    sortBy,
+    maxDistance = 5000,
+  } = req.query;
+
+  try {
+    const geoNearStage = {
+      $geoNear: {
+        near: {
+          type: "Point",
+          coordinates: [parseFloat(longitude), parseFloat(latitude)],
+        },
+        distanceField: "distance",
+        maxDistance: parseFloat(maxDistance),
+        spherical: true,
+        query: {}, // You can add additional query filters if needed
+      },
+    };
+
+    // Create sort criteria based on sortBy parameter
+    let sortCriteria = {};
+    switch (sortBy) {
+      case "latest":
+        sortCriteria = { createdAt: -1 };
+        break;
+      case "maxPrice":
+        sortCriteria = { "rooms.roomPrice": -1 };
+        break;
+      case "minPrice":
+        sortCriteria = { "rooms.roomPrice": 1 };
+        break;
+      case "rating":
+        sortCriteria = { "ratings.averageRating": -1 };
+        break;
+      default:
+        sortCriteria = { distance: 1 }; // Default to sorting by distance
+        break;
+    }
+
+    // First, get the hotels sorted by distance
+    const hotels = await HotelModel.aggregate([
+      geoNearStage,
+      {
+        $sort: sortCriteria, // Sort based on the criteria
+      },
+      {
+        $skip: (page - 1) * 6, // Pagination: skip
+      },
+      {
+        $limit: 6, // Limit the number of results
+      },
+    ]);
+
+    // Count the total number of nearby hotels
+    const totalCount = await HotelModel.aggregate([
+      geoNearStage,
+      {
+        $count: "total", // Count the number of hotels
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: hotels,
+      currentPage: parseInt(page, 10),
+      totalPages:
+        totalCount.length > 0 ? Math.ceil(totalCount[0].total / 6) : 0,
+    });
+  } catch (error) {
+    console.error("Error fetching hotels:", error);
+    res.status(500).json({ message: "Error fetching hotels" });
   }
 };
 
@@ -408,4 +494,5 @@ export {
   bookHotel,
   getBookingListByUserId,
   verifyOrder,
+  listHotelsByDistance,
 };

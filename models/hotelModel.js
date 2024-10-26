@@ -92,6 +92,15 @@ const hotelSchema = new mongoose.Schema(
     country: { type: String, required: true },
     province: { type: String, required: true },
     city: { type: String, required: true },
+    streetname: { type: String, required: true },
+    url: { type: String, required: true },
+    location: {
+      type: { type: String, enum: ["Point"], required: true, default: "Point" },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        required: true,
+      },
+    },
     gym: { type: Boolean, default: false },
     spa: { type: Boolean, default: false },
     bar: { type: Boolean, default: false },
@@ -113,6 +122,8 @@ const hotelSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+hotelSchema.index({ location: "2dsphere" });
 
 const HotelModel =
   mongoose.models.Hotel || mongoose.model("Hotel", hotelSchema);

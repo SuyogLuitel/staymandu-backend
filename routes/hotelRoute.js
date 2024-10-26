@@ -8,6 +8,7 @@ import {
   getHotelById,
   getHotelByUserId,
   listHotel,
+  listHotelsByDistance,
   verifyOrder,
 } from "../controller/hotelController.js";
 import multer from "multer";
@@ -33,6 +34,9 @@ hotelRouter.post("/add-room/:hotelId", upload.single("image"), addRoomToHotel);
 
 // Route to list all hotel
 hotelRouter.get("/list", listHotel);
+
+// Route to list hotels by distance
+hotelRouter.get("/nearest", listHotelsByDistance);
 
 // Route to list hotel based on user id
 hotelRouter.get("/list/:userId", getHotelByUserId);
