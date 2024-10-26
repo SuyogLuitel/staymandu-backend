@@ -34,9 +34,17 @@ const bookingSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  status: {
+    type: String,
+    default: "Processing",
+  },
   endDate: {
     type: Date,
     required: true,
+  },
+  payment: {
+    type: Boolean,
+    default: false,
   },
   createdAt: {
     type: Date,

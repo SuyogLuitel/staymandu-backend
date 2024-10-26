@@ -1,7 +1,12 @@
 import fs from "fs";
 import HotelModel from "../models/hotelModel.js";
 import mongoose from "mongoose";
+import Stripe from "stripe";
+import dotenv from "dotenv";
 
+dotenv.config();
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // add hotel
 const addHotel = async (req, res) => {
   let image_filename = `${req?.file?.filename}`;
@@ -253,10 +258,10 @@ const getHotelByUserId = async (req, res) => {
   }
 };
 
-// book hotel
 const bookHotel = async (req, res) => {
-  const { roomId, userId, totalPrice, startDate, endDate } = req.body;
+  const frontend_url = "http://localhost:5173";
 
+  const { roomId, userId, totalPrice, startDate, endDate } = req.body;
   try {
     const hotel = await HotelModel.findOne({ "rooms._id": roomId });
 
@@ -266,19 +271,8 @@ const bookHotel = async (req, res) => {
 
     const room = hotel.rooms.id(roomId);
 
-    const isRoomAvailable = room.booking.every((booking) => {
-      const bookingStart = new Date(booking.startDate);
-      const bookingEnd = new Date(booking.endDate);
-      return startDate >= bookingEnd || endDate <= bookingStart; // Room is available if new booking does not overlap with existing bookings
-    });
-
-    if (!isRoomAvailable) {
-      return res
-        .status(400)
-        .json({ message: "Room is not available for the selected dates." });
-    }
-
     const newBooking = {
+      _id: new mongoose.Types.ObjectId(),
       userId,
       totalPrice,
       startDate,
@@ -290,9 +284,42 @@ const bookHotel = async (req, res) => {
 
     await hotel.save();
 
-    return res
-      .status(201)
-      .json({ message: "Booking successful", booking: newBooking });
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `Room ${roomId}`,
+            },
+            unit_amount: totalPrice * 100,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: `${frontend_url}/verify?success=true&bookingId=${newBooking?._id}`,
+      cancel_url: `${frontend_url}/verify?success=false&bookingId=${newBooking?._id}`,
+    });
+
+    return res.json({ success: true, session_url: session.url });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error booking hotel", error: error.message });
+  }
+};
+
+const verifyOrder = async (req, res) => {
+  const { bookingId, success } = req.body;
+  try {
+    if (success == "true") {
+      await HotelModel.findByIdAndUpdate(bookingId, { payment: true });
+      res.json({ sucess: true, message: "Payment Successfull" });
+    } else {
+      await HotelModel.findByIdAndDelete(bookingId);
+      res.json({ sucess: false, message: "Payment Unsuccessfull" });
+    }
   } catch (error) {
     res
       .status(500)
@@ -376,4 +403,5 @@ export {
   getHotelByUserId,
   bookHotel,
   getBookingListByUserId,
+  verifyOrder,
 };

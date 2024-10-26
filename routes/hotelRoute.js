@@ -8,6 +8,7 @@ import {
   getHotelById,
   getHotelByUserId,
   listHotel,
+  verifyOrder,
 } from "../controller/hotelController.js";
 import multer from "multer";
 
@@ -44,6 +45,7 @@ hotelRouter.post("/add-review", addReview);
 
 // Route to book hotel
 hotelRouter.post("/book-hotel", bookHotel);
+hotelRouter.post("/verify", verifyOrder);
 
 // Route to list booked hotel by user id
 hotelRouter.get("/booking/:userId", getBookingListByUserId);
