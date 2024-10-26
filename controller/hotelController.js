@@ -314,7 +314,10 @@ const verifyOrder = async (req, res) => {
   const { bookingId, success } = req.body;
   try {
     if (success == "true") {
-      await HotelModel.findByIdAndUpdate(bookingId, { payment: true });
+      await HotelModel.findByIdAndUpdate(bookingId, {
+        payment: true,
+        status: "Completed",
+      });
       res.json({ sucess: true, message: "Payment Successfull" });
     } else {
       await HotelModel.findByIdAndDelete(bookingId);
@@ -358,14 +361,15 @@ const getBookingListByUserId = async (req, res) => {
               (booking) => booking.userId.toString() === userId
             );
             return {
-              id: room._id, // Room ID
-              title: room.title, // Room title
-              image: room.image, // Room image
-              bedCount: room.bedCount, // Bed count
-              guestCount: room.guestCount, // Guest count
-              totalPrice: bookingDetails.totalPrice, // Booking price
-              startDate: bookingDetails.startDate, // Start date of the booking
-              endDate: bookingDetails.endDate, // End date of the booking
+              id: room._id,
+              title: room.title,
+              image: room.image,
+              bedCount: room.bedCount,
+              guestCount: room.guestCount,
+              totalPrice: bookingDetails.totalPrice,
+              startDate: bookingDetails.startDate,
+              endDate: bookingDetails.endDate,
+              status: bookingDetails.status,
             };
           });
 
