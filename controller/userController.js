@@ -26,14 +26,12 @@ const loginUser = async (req, res) => {
 
     const token = createToken(user._id);
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Login successfully",
-        access: token,
-        data: user,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Login successfully",
+      access: token,
+      data: user,
+    });
   } catch (error) {
     console.log(error);
   }
@@ -85,4 +83,73 @@ const registerUser = async (req, res) => {
   }
 };
 
-export { loginUser, registerUser };
+// Add a favorite hotel to user's favorites
+const addFavoriteHotel = async (req, res) => {
+  const { userId, hotelId } = req.body;
+
+  try {
+    // Check if the user exists
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Determine if the hotel is already a favorite
+    const isFavorite = user.favorites.includes(hotelId);
+
+    // Update the user's favorites based on current status
+    const updatedUser = await userModel
+      .findByIdAndUpdate(
+        userId,
+        isFavorite
+          ? { $pull: { favorites: hotelId } }
+          : { $addToSet: { favorites: hotelId } },
+        { new: true }
+      )
+      .populate("favorites");
+
+    // Respond with appropriate success message
+    res.status(200).json({
+      success: true,
+      message: isFavorite
+        ? "Hotel removed from favorites successfully"
+        : "Hotel added to favorites successfully",
+      data: updatedUser.favorites,
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// Get all favorite hotels for a specific user
+const getFavorites = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await userModel.findById(userId).populate("favorites");
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Favorite hotels fetched successfully",
+      data: user.favorites,
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+export { loginUser, registerUser, addFavoriteHotel, getFavorites };
