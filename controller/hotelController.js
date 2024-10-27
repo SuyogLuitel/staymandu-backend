@@ -1,4 +1,3 @@
-import fs from "fs";
 import HotelModel from "../models/hotelModel.js";
 import mongoose from "mongoose";
 import Stripe from "stripe";
@@ -71,6 +70,9 @@ const listHotel = async (req, res) => {
         break;
       case "rating":
         sortCriteria = { "ratings.averageRating": -1 };
+        break;
+      case "default":
+        sortCriteria = { clickCount: -1 };
         break;
       default:
         sortCriteria = {};
@@ -224,6 +226,28 @@ const getHotelById = async (req, res) => {
       message: "Error fetching hotel",
       error: error.message,
     });
+  }
+};
+
+// increment count
+const incrementCount = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find hotel by ID and increment clickCount
+    const hotel = await HotelModel.findByIdAndUpdate(
+      id,
+      { $inc: { clickCount: 1 } },
+      { new: true }
+    );
+
+    if (!hotel) {
+      return res.status(404).json({ message: "Hotel not found" });
+    }
+
+    res.status(200).json({ message: "Click count updated", hotel });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating click count", error });
   }
 };
 
@@ -498,4 +522,5 @@ export {
   getBookingListByUserId,
   verifyOrder,
   listHotelsByDistance,
+  incrementCount,
 };

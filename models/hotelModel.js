@@ -86,6 +86,7 @@ const hotelSchema = new mongoose.Schema(
       enum: ["Hotel", "Apartment", "Villa", "Resort"],
       required: true,
     },
+    clickCount: { type: Number, default: 0 },
     description: { type: String, required: true },
     locationDescription: { type: String },
     image: { type: String, required: true },

@@ -7,6 +7,7 @@ import {
   getBookingListByUserId,
   getHotelById,
   getHotelByUserId,
+  incrementCount,
   listHotel,
   listHotelsByDistance,
   verifyOrder,
@@ -34,6 +35,9 @@ hotelRouter.post("/add-room/:hotelId", upload.single("image"), addRoomToHotel);
 
 // Route to list all hotel
 hotelRouter.get("/list", listHotel);
+
+// Route to increment count
+hotelRouter.patch("/increment/:id", incrementCount);
 
 // Route to list hotels by distance
 hotelRouter.get("/nearest", listHotelsByDistance);
