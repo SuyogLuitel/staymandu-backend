@@ -61,7 +61,7 @@ const roomSchema = new mongoose.Schema({
   guestCount: { type: Number, required: true },
   view: {
     type: String,
-    enum: ["cityView", "oceanView", "forestView", "mountainView"],
+    enum: ["cityView", "lakeView", "forestView", "mountainView"],
     required: true,
   },
   roomService: { type: Boolean, default: false },
