@@ -83,6 +83,17 @@ const registerUser = async (req, res) => {
   }
 };
 
+const getAllUser = async (req, res) => {
+  try {
+    // checking if user already exists
+    const user = await userModel.find({});
+
+    res.status(200).json({ success: true, user: user });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 // Add a favorite hotel to user's favorites
 const addFavoriteHotel = async (req, res) => {
   const { userId, hotelId } = req.body;
@@ -152,4 +163,4 @@ const getFavorites = async (req, res) => {
   }
 };
 
-export { loginUser, registerUser, addFavoriteHotel, getFavorites };
+export { loginUser, registerUser, addFavoriteHotel, getFavorites, getAllUser };

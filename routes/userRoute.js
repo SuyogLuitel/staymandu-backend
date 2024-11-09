@@ -1,6 +1,7 @@
 import express from "express";
 import {
   addFavoriteHotel,
+  getAllUser,
   getFavorites,
   loginUser,
   registerUser,
@@ -8,6 +9,7 @@ import {
 
 const userRouter = express.Router();
 
+userRouter.get("/list", getAllUser);
 userRouter.post("/register", registerUser);
 userRouter.post("/login", loginUser);
 userRouter.post("/favorite", addFavoriteHotel);
