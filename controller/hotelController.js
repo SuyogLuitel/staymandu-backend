@@ -82,7 +82,7 @@ const listHotel = async (req, res) => {
     const totalHotels = await HotelModel.countDocuments();
 
     const pageNumber = parseInt(page, 10);
-    const limit = 6;
+    const limit = 12;
 
     const hotels = await HotelModel.find({})
       .sort(sortCriteria)
@@ -155,10 +155,10 @@ const listHotelsByDistance = async (req, res) => {
         $sort: sortCriteria, // Sort based on the criteria
       },
       {
-        $skip: (page - 1) * 6, // Pagination: skip
+        $skip: (page - 1) * 12, // Pagination: skip
       },
       {
-        $limit: 6, // Limit the number of results
+        $limit: 12, // Limit the number of results
       },
     ]);
 
@@ -175,7 +175,7 @@ const listHotelsByDistance = async (req, res) => {
       data: hotels,
       currentPage: parseInt(page, 10),
       totalPages:
-        totalCount.length > 0 ? Math.ceil(totalCount[0].total / 6) : 0,
+        totalCount.length > 0 ? Math.ceil(totalCount[0].total / 12) : 0,
     });
   } catch (error) {
     console.error("Error fetching hotels:", error);
@@ -401,9 +401,11 @@ const bookHotel = async (req, res) => {
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: "npr",
             product_data: {
-              name: `Room ${roomId}`,
+              name: `Room: ${room?.title}`,
+              description: `Bed Count: ${room?.bedCount}, Guest Count: ${room?.guestCount}`,
+              images: [`http://localhost:4000/uploads/${room?.image}`],
             },
             unit_amount: totalPrice * 100,
           },
