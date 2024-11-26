@@ -4,6 +4,7 @@ import {
   addReview,
   addRoomToHotel,
   bookHotel,
+  deleteHotel,
   getBookingListByUserId,
   getHotelById,
   getHotelByUserId,
@@ -35,6 +36,9 @@ hotelRouter.post("/add-room/:hotelId", upload.single("image"), addRoomToHotel);
 
 // Route to list all hotel
 hotelRouter.get("/list", listHotel);
+
+// Route to delete hotel
+hotelRouter.delete("/:hotelId", deleteHotel);
 
 // Route to increment count
 hotelRouter.patch("/increment/:id", incrementCount);

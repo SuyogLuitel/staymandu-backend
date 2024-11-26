@@ -51,6 +51,27 @@ const addHotel = async (req, res) => {
   }
 };
 
+// Controller to delete a hotel by ID
+export const deleteHotel = async (req, res) => {
+  try {
+    const { hotelId } = req.params;
+
+    // Check if the hotel exists
+    const hotel = await HotelModel.findById(hotelId);
+    if (!hotel) {
+      return res.status(404).json({ message: "Hotel not found." });
+    }
+
+    // Delete the hotel
+    await HotelModel.findByIdAndDelete(hotelId);
+
+    res.status(200).json({ message: "Hotel deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting hotel:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 // List all hotels based on the latest added
 const listHotel = async (req, res) => {
   try {
@@ -515,6 +536,7 @@ const getBookingListByUserId = async (req, res) => {
 
 export {
   addHotel,
+  deleteHotel,
   listHotel,
   getHotelById,
   addReview,
